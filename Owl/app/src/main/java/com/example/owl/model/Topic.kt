@@ -22,7 +22,8 @@ import androidx.compose.runtime.Immutable
 data class Topic(
     val name: String,
     val courses: Int,
-    val imageUrl: String
+    val imageUrl: String,
+    val isRemoved: Boolean = false
 )
 
 val topics = listOf(

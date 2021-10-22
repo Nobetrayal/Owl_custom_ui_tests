@@ -17,6 +17,8 @@
 package com.example.owl.ui
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,6 +48,8 @@ object MainDestinations {
     const val COURSE_DETAIL_ID_KEY = "courseId"
 }
 
+@ExperimentalFoundationApi
+@ExperimentalAnimationApi
 @Composable
 fun NavGraph(
     modifier: Modifier = Modifier,

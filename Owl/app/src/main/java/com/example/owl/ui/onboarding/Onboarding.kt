@@ -16,46 +16,24 @@
 
 package com.example.owl.ui.onboarding
 
+import android.widget.GridLayout
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.updateTransition
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.*
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.GridCells
+import androidx.compose.foundation.lazy.LazyVerticalGrid
 import androidx.compose.foundation.shape.CornerSize
-import androidx.compose.material.ContentAlpha
-import androidx.compose.material.FloatingActionButton
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.LocalContentAlpha
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.rounded.Explore
-import androidx.compose.material.primarySurface
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.State
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
@@ -77,7 +55,9 @@ import com.google.accompanist.insets.navigationBarsPadding
 import com.google.accompanist.insets.statusBarsPadding
 import kotlin.math.max
 
+@ExperimentalFoundationApi
 @Composable
+@ExperimentalAnimationApi
 fun Onboarding(onboardingComplete: () -> Unit) {
     YellowTheme {
         Scaffold(
@@ -148,17 +128,47 @@ private fun AppBar() {
     }
 }
 
+@ExperimentalFoundationApi
+@ExperimentalAnimationApi
 @Composable
 private fun TopicsGrid(modifier: Modifier = Modifier) {
-    StaggeredGrid(
-        modifier = modifier
-            .horizontalScroll(rememberScrollState())
-            .padding(horizontal = 8.dp)
-    ) {
-        topics.forEach { topic ->
-            TopicChip(topic = topic)
+
+    val (topics2, onSelect: (List<Topic>) -> Unit) = remember {
+        mutableStateOf(topics)
+    }
+//    Row {
+//
+//    }
+    Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+
+
+        FlowRow {
+//        AnimatedContent(targetState = topics2) {
+            topics2.forEach { topic ->
+                TopicChip(topic = topic) { topic1 ->
+                    onSelect.invoke(topics2.filter { it != topic1 })
+//                    onSelect.invoke(topics2.map {
+//                       if ( topic1 == it) {
+//                           topic1.copy(isRemoved = true)
+//                       } else {
+//                           topic1
+//                       }
+//                    })
+                }
+            }
+//        }
+
         }
     }
+//    StaggeredGrid(
+//        modifier = modifier
+//            .horizontalScroll(rememberScrollState())
+//            .padding(horizontal = 8.dp)
+//    ) {
+//        topics.forEach { topic ->
+//            TopicChip(topic = topic)
+//        }
+//    }
 }
 
 private enum class SelectionState { Unselected, Selected }
@@ -204,77 +214,83 @@ private fun topicChipTransition(topicSelected: Boolean): TopicChipTransition {
     }
 }
 
+@ExperimentalAnimationApi
 @Composable
-private fun TopicChip(topic: Topic) {
+private fun TopicChip(topic: Topic, onClick: (Topic) -> Unit) {
     val (selected, onSelected) = remember { mutableStateOf(false) }
     val topicChipTransitionState = topicChipTransition(selected)
 
-    Surface(
-        modifier = Modifier.padding(4.dp),
-        elevation = OwlTheme.elevations.card,
-        shape = MaterialTheme.shapes.medium.copy(
-            topStart = CornerSize(
-                topicChipTransitionState.cornerRadius
-            )
-        )
-    ) {
-        Row(modifier = Modifier.toggleable(value = selected, onValueChange = onSelected)) {
-            Box {
-                NetworkImage(
-                    url = topic.imageUrl,
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(width = 72.dp, height = 72.dp)
-                        .aspectRatio(1f)
-                )
-                if (topicChipTransitionState.selectedAlpha > 0f) {
-                    Surface(
-                        color = pink500.copy(alpha = topicChipTransitionState.selectedAlpha),
-                        modifier = Modifier.matchParentSize()
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Done,
-                            contentDescription = null,
-                            tint = MaterialTheme.colors.onPrimary.copy(
-                                alpha = topicChipTransitionState.selectedAlpha
-                            ),
-                            modifier = Modifier
-                                .wrapContentSize()
-                                .scale(topicChipTransitionState.checkScale)
-                        )
-                    }
-                }
-            }
-            Column {
-                Text(
-                    text = topic.name,
-                    style = MaterialTheme.typography.body1,
-                    modifier = Modifier.padding(
-                        start = 16.dp,
-                        top = 16.dp,
-                        end = 16.dp,
-                        bottom = 8.dp
+//    AnimatedContent(targetState = topic) {
+        if (!topic.isRemoved) {
+            Surface(
+                modifier = Modifier.padding(4.dp),
+                elevation = OwlTheme.elevations.card,
+                shape = MaterialTheme.shapes.medium.copy(
+                    topStart = CornerSize(
+                        topicChipTransitionState.cornerRadius
                     )
                 )
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_grain),
+            ) {
+                Row(modifier = Modifier.clickable(onClick = { onClick.invoke(topic) })) {
+//        Row(modifier = Modifier.toggleable(value = selected, onValueChange = onSelected)) {
+                    Box {
+                        NetworkImage(
+                            url = topic.imageUrl,
                             contentDescription = null,
                             modifier = Modifier
-                                .padding(start = 16.dp)
-                                .size(12.dp)
+                                .size(width = 72.dp, height = 72.dp)
+                                .aspectRatio(1f)
                         )
+                        if (topicChipTransitionState.selectedAlpha > 0f) {
+                            Surface(
+                                color = pink500.copy(alpha = topicChipTransitionState.selectedAlpha),
+                                modifier = Modifier.matchParentSize()
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.Done,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colors.onPrimary.copy(
+                                        alpha = topicChipTransitionState.selectedAlpha
+                                    ),
+                                    modifier = Modifier
+                                        .wrapContentSize()
+                                        .scale(topicChipTransitionState.checkScale)
+                                )
+                            }
+                        }
+                    }
+                    Column {
                         Text(
-                            text = topic.courses.toString(),
-                            style = MaterialTheme.typography.caption,
-                            modifier = Modifier.padding(start = 8.dp)
+                            text = topic.name,
+                            style = MaterialTheme.typography.body1,
+                            modifier = Modifier.padding(
+                                start = 16.dp,
+                                top = 16.dp,
+                                end = 16.dp,
+                                bottom = 8.dp
+                            )
                         )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_grain),
+                                    contentDescription = null,
+                                    modifier = Modifier
+                                        .padding(start = 16.dp)
+                                        .size(12.dp)
+                                )
+                                Text(
+                                    text = topic.courses.toString(),
+                                    style = MaterialTheme.typography.caption,
+                                    modifier = Modifier.padding(start = 8.dp)
+                                )
+                            }
+                        }
                     }
                 }
             }
         }
-    }
+//    }
 }
 
 @Composable
@@ -328,16 +344,19 @@ private fun StaggeredGrid(
     }
 }
 
+@ExperimentalFoundationApi
+@ExperimentalAnimationApi
 @Preview(name = "Onboarding")
 @Composable
 private fun OnboardingPreview() {
     Onboarding(onboardingComplete = { })
 }
 
+@ExperimentalAnimationApi
 @Preview("Topic Chip")
 @Composable
 private fun TopicChipPreview() {
     YellowTheme {
-        TopicChip(topics.first())
+        TopicChip(topics.first(), {})
     }
 }

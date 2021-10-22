@@ -16,6 +16,8 @@
 
 package com.example.owl.ui
 
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
@@ -42,6 +44,8 @@ import com.google.accompanist.insets.navigationBarsHeight
 import com.google.accompanist.insets.navigationBarsPadding
 import java.util.Locale
 
+@ExperimentalFoundationApi
+@ExperimentalAnimationApi
 @Composable
 fun OwlApp(finishActivity: () -> Unit) {
     ProvideWindowInsets {
